@@ -1,5 +1,17 @@
-.docker/data/
-ssl/
-.env
-.wwebjs_auth
-.idea
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.DS_Store
+.env*
+dist/
+build/
+coverage/
+.tmp/
+.cache/
+logs/
+*.log
+.vscode/
+.idea/
