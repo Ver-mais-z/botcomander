@@ -324,6 +324,7 @@ const messages = {
           annoucements: "Informativos",
           chats: "Chat Interno",
           financeiro: "Financeiro",
+          customColumns: "Personalizações", // Adicione esta linha
         },
         appBar: {
           user: {

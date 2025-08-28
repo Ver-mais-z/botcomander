@@ -9,6 +9,7 @@ import Contact from "./models/Contact";
 import { Op, QueryTypes } from "sequelize";
 import GetDefaultWhatsApp from "./helpers/GetDefaultWhatsApp";
 import Campaign from "./models/Campaign";
+import CustomColumn from "./models/CustomColumn";
 import ContactList from "./models/ContactList";
 import ContactListItem from "./models/ContactListItem";
 import { isEmpty, isNil, isArray } from "lodash";
@@ -124,7 +125,7 @@ try {
 }
 
 // Função para processar variáveis nos agendamentos (igual campanhas)
-function getProcessedScheduleMessage(msg: string, contact: any, variables: any[] = []) {
+async function getProcessedScheduleMessage(msg: string, contact: any, variables: any[] = []) {
   let finalMessage = msg;
   
   // Variáveis padrão do contato
@@ -145,6 +146,20 @@ function getProcessedScheduleMessage(msg: string, contact: any, variables: any[]
       finalMessage = finalMessage.replace(regex, variable.value);
     }
   });
+
+  // Buscar colunas personalizadas
+  try {
+    const customColumns = await CustomColumn.findAll();
+    
+    for (const column of customColumns) {
+      if (finalMessage.includes(`{${column.name}}`)) {
+        const regex = new RegExp(`{${column.name}}`, "g");
+        finalMessage = finalMessage.replace(regex, column.message);
+      }
+    }
+  } catch (error) {
+    console.error("Erro ao buscar colunas personalizadas:", error);
+  }
   
   return finalMessage;
 }
@@ -177,8 +192,8 @@ async function handleSendScheduledMessage(job: any) {
 
     const chatId = `${scheduleRecord.contact.number}@c.us`;
     
-    // Processar variáveis na mensagem (igual nas campanhas)
-    const processedMessage = getProcessedScheduleMessage(
+    // Processar variáveis na mensagem (igual nas campanhas) - CORREÇÃO: Adicionado await
+    const processedMessage = await getProcessedScheduleMessage(
       scheduleRecord.body, 
       scheduleRecord.contact, 
       [] // aqui você pode passar variáveis personalizadas se precisar
@@ -315,19 +330,37 @@ if (!isEmpty(campaign.confirmationMessage5) && !isNil(campaign.confirmationMessa
 return messages;
 }
 
-function getProcessedMessage(msg: string, variables: any[], contact: any) {
-let finalMessage = msg;
-if (finalMessage.includes("{nome}")) finalMessage = finalMessage.replace(/{nome}/g, contact.name);
-if (finalMessage.includes("{email}")) finalMessage = finalMessage.replace(/{email}/g, contact.email);
-if (finalMessage.includes("{numero}")) finalMessage = finalMessage.replace(/{numero}/g, contact.number);
+async function getProcessedMessage(msg: string, variables: any[], contact: any) {
+  let finalMessage = msg;
+  
+  // Variáveis padrão
+  if (finalMessage.includes("{nome}")) finalMessage = finalMessage.replace(/{nome}/g, contact.name || "");
+  if (finalMessage.includes("{email}")) finalMessage = finalMessage.replace(/{email}/g, contact.email || "");
+  if (finalMessage.includes("{numero}")) finalMessage = finalMessage.replace(/{numero}/g, contact.number || "");
 
-variables.forEach(variable => {
-  if (finalMessage.includes(`{${variable.key}}`)) {
-    const regex = new RegExp(`{${variable.key}}`, "g");
-    finalMessage = finalMessage.replace(regex, variable.value);
+  // Variáveis personalizadas do sistema antigo
+  variables.forEach(variable => {
+    if (finalMessage.includes(`{${variable.key}}`)) {
+      const regex = new RegExp(`{${variable.key}}`, "g");
+      finalMessage = finalMessage.replace(regex, variable.value);
+    }
+  });
+
+  // Buscar colunas personalizadas
+  try {
+    const customColumns = await CustomColumn.findAll();
+    
+    for (const column of customColumns) {
+      if (finalMessage.includes(`{${column.name}}`)) {
+        const regex = new RegExp(`{${column.name}}`, "g");
+        finalMessage = finalMessage.replace(regex, column.message);
+      }
+    }
+  } catch (error) {
+    console.error("Erro ao buscar colunas personalizadas:", error);
   }
-});
-return finalMessage;
+  
+  return finalMessage;
 }
 
 export function randomValue(min: any, max: any) {
@@ -465,7 +498,8 @@ try {
   
   if (messages.length) {
     const radomIndex = randomValue(0, messages.length);
-    const message = getProcessedMessage(messages[radomIndex], variables, contact);
+    // CORREÇÃO: Adicionado await
+    const message = await getProcessedMessage(messages[radomIndex], variables, contact);
     campaignShipping.message = `\u200c${message}`;
     console.log(`[DEBUG] Message processed (index ${radomIndex}): ${message.substring(0, 50)}...`);
   } else {
@@ -479,7 +513,8 @@ try {
     
     if (confirmationMessages.length) {
       const radomIndex = randomValue(0, confirmationMessages.length);
-      const message = getProcessedMessage(confirmationMessages[radomIndex], variables, contact);
+      // CORREÇÃO: Adicionado await
+      const message = await getProcessedMessage(confirmationMessages[radomIndex], variables, contact);
       campaignShipping.confirmationMessage = `\u200c${message}`;
       console.log(`[DEBUG] Confirmation message processed`);
     }

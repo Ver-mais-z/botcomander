@@ -16,6 +16,7 @@ import ContactListItem from "./contactListItemRoutes";
 import CampaignSetting from "./campaignSettingRoutes";
 import ContactList from "./contactListRoutes";
 import Schedule from "./scheduleRoutes";
+import CustomColumn from "./CustomColumnsRouters";
 
 
 const routes = Router();
@@ -35,6 +36,7 @@ routes.use(ContactListItem);
 routes.use(CampaignSetting);
 routes.use(ContactList);
 routes.use(Schedule);
+routes.use(CustomColumn);
 routes.use("/api/messages", apiRoutes);
 
 export default routes;
