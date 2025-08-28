@@ -101,6 +101,13 @@ export NODE_OPTIONS=--openssl-legacy-provider
 npm start
 ```
 
+Ou se estiver usando Windows:
+
+```bash
+$env:NODE_OPTIONS="--openssl-legacy-provider"
+npm start
+```
+
 ## Credenciais Padrão
 
 - **Usuário:** admin@whaticket.com
