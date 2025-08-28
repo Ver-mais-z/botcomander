@@ -23,6 +23,7 @@ import AccountTreeOutlinedIcon from "@material-ui/icons/AccountTreeOutlined";
 import QuestionAnswerOutlinedIcon from "@material-ui/icons/QuestionAnswerOutlined";
 import ListIcon from "@material-ui/icons/List";
 import PeopleIcon from "@material-ui/icons/People";
+import MessageIcon from "@material-ui/icons/Message";
 
 import { i18n } from "../translate/i18n";
 import { WhatsAppsContext } from "../context/WhatsApp/WhatsAppsContext";
@@ -163,6 +164,11 @@ const MainListItems = (props) => {
             </Badge>
           }
         />
+            <ListItemLink
+              to="/Custom-Columns"
+              primary={i18n.t("mainDrawer.listItems.customColumns")}
+              icon={<MessageIcon />}
+            />
 
             <ListItemLink
               to="/users"

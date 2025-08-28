@@ -18,6 +18,7 @@ import Campaigns from "../pages/Campaigns";
 import CampaignsConfig from "../pages/CampaignsConfig";
 import CampaignReport from "../pages/CampaignReport";
 import ContactLists from "../pages/ContactLists";
+import CustomColumns from "../pages/CustomColumns";
 import ContactListItems from "../pages/ContactListItems";
 import { AuthProvider } from "../context/Auth/AuthContext";
 import { WhatsAppsProvider } from "../context/WhatsApp/WhatsAppsContext";
@@ -47,6 +48,7 @@ const Routes = () => {
                 <Route exact path="/quickAnswers" component={QuickAnswers} isPrivate />
                 <Route exact path="/Settings" component={Settings} isPrivate />
                 <Route exact path="/Queues" component={Queues} isPrivate />
+                <Route exact path="/Custom-Columns" component={CustomColumns} isPrivate />
                 <Route exact path="/schedules" component={Schedules} isPrivate />
               </LoggedInLayout>
             </WhatsAppsProvider>

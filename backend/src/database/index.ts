@@ -16,7 +16,7 @@ import ContactList from "../models/ContactList";
 import ContactListItem from "../models/ContactListItem";
 import CampaignSetting from "../models/CampaignSetting";
 import Schedule from "../models/Schedule";
-
+import CustomColumn from "../models/CustomColumn";
 
 // eslint-disable-next-line
 const dbConfig = require("../config/database");
@@ -41,7 +41,8 @@ const models = [
   CampaignShipping,
   ContactListItem,
   CampaignSetting,
-  Schedule
+  Schedule,
+  CustomColumn
 ];
 
 sequelize.addModels(models);
