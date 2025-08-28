@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useContext } from "react";
 import { useHistory } from "react-router-dom";
 import { format } from "date-fns";
-import openSocket from "../../services/socket-io";
+import openSocket from "../../services/socket";
 import useSound from "use-sound";
 
 import Popover from "@material-ui/core/Popover";

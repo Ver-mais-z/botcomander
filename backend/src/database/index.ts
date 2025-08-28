@@ -10,6 +10,13 @@ import Queue from "../models/Queue";
 import WhatsappQueue from "../models/WhatsappQueue";
 import UserQueue from "../models/UserQueue";
 import QuickAnswer from "../models/QuickAnswer";
+import Campaign from "../models/Campaign";
+import CampaignShipping from "../models/CampaignShipping";
+import ContactList from "../models/ContactList";
+import ContactListItem from "../models/ContactListItem";
+import CampaignSetting from "../models/CampaignSetting";
+import Schedule from "../models/Schedule";
+
 
 // eslint-disable-next-line
 const dbConfig = require("../config/database");
@@ -28,7 +35,13 @@ const models = [
   Queue,
   WhatsappQueue,
   UserQueue,
-  QuickAnswer
+  QuickAnswer,
+  Campaign,
+  ContactList,
+  CampaignShipping,
+  ContactListItem,
+  CampaignSetting,
+  Schedule
 ];
 
 sequelize.addModels(models);

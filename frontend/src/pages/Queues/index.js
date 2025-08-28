@@ -1,6 +1,6 @@
 import React, { useEffect, useReducer, useState } from "react";
 
-import openSocket from "../../services/socket-io";
+import openSocket from "../../services/socket";
 
 import {
   Button,

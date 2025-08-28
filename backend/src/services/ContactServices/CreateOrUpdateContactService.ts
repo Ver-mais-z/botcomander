@@ -1,7 +1,8 @@
 import { getIO } from "../../libs/socket";
 import Contact from "../../models/Contact";
+import ContactCustomField from "../../models/ContactCustomField";
 
-interface ExtraInfo {
+interface ExtraInfo extends ContactCustomField {
   name: string;
   value: string;
 }
@@ -28,7 +29,9 @@ const CreateOrUpdateContactService = async ({
   const io = getIO();
   let contact: Contact | null;
 
-  contact = await Contact.findOne({ where: { number } });
+  contact = await Contact.findOne({
+    where: { number }
+  });
 
   if (contact) {
     contact.update({ profilePicUrl });

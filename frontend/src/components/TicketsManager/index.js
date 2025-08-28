@@ -18,6 +18,178 @@ import { AuthContext } from "../../context/Auth/AuthContext";
 import { Can } from "../Can";
 import TicketsQueueSelect from "../TicketsQueueSelect";
 import { Button } from "@material-ui/core";
+import { onTicketUpdate, joinStatusRoom, leaveStatusRoom } from "../../services/socket";
+import List from "@material-ui/core/List";
+import TicketListItem from "../TicketListItem";
+import api from "../../services/api";
+
+// Normalização de status
+const normalizeStatus = (s) => {
+  if (!s) return "pending";
+  const v = String(s).toLowerCase();
+  if (v === "open") return "open";
+  if (v === "pending") return "pending";
+  if (v === "aguardando") return "aguardando";
+  if (v === "atendendo") return "atendendo";
+  if (v === "fechado" || v === "closed") return "fechado";
+  return "pending";
+};
+
+const CombinedTicketsList = ({ tabOpen, showAll, selectedQueueIds, updateOpenCount, updatePendingCount }) => {
+  const [openTickets, setOpenTickets] = useState([]);
+  const [pendingTickets, setPendingTickets] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [hasInitialLoad, setHasInitialLoad] = useState(false);
+  const { user } = useContext(AuthContext);
+
+  // Função para buscar tickets da API
+  const fetchTickets = async () => {
+    try {
+      setLoading(true);
+      
+      // Buscar tickets open
+      const openParams = {
+        pageNumber: 1,
+        status: "open",
+        showAll,
+        queueIds: JSON.stringify(selectedQueueIds),
+      };
+      
+      const openResponse = await api.get("/tickets", { params: openParams });
+      
+      // Buscar tickets pending  
+      const pendingParams = {
+        pageNumber: 1,
+        status: "pending", 
+        showAll,
+        queueIds: JSON.stringify(selectedQueueIds),
+      };
+      
+      const pendingResponse = await api.get("/tickets", { params: pendingParams });
+      
+      setOpenTickets(openResponse.data.tickets || []);
+      setPendingTickets(pendingResponse.data.tickets || []);
+      setHasInitialLoad(true);
+      
+    } catch (error) {
+      console.error("Erro ao buscar tickets:", error);
+      setOpenTickets([]);
+      setPendingTickets([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Buscar tickets na inicialização e quando parâmetros mudam
+  useEffect(() => {
+    setHasInitialLoad(false);
+    fetchTickets();
+  }, [showAll, selectedQueueIds]);
+
+  // Gerencia salas de socket
+  useEffect(() => {
+    joinStatusRoom("open");
+    joinStatusRoom("pending");
+    
+    return () => {
+      leaveStatusRoom("open");
+      leaveStatusRoom("pending");
+    };
+  }, []);
+
+  // Handler para atualizações via socket
+  useEffect(() => {
+    const shouldUpdateTicket = ticket => {
+      // Verificação mais robusta para incluir tickets aceitos
+      const userMatch = !ticket.userId || ticket.userId === user?.id || showAll;
+      const queueMatch = !ticket.queueId || selectedQueueIds.length === 0 || selectedQueueIds.indexOf(ticket.queueId) > -1;
+      return userMatch && queueMatch;
+    };
+
+    const offTicket = onTicketUpdate(data => {
+      console.log("Socket update received:", data); // Debug log
+      
+      if (data.action === "delete") {
+        setOpenTickets(prev => prev.filter(t => t.id !== data.ticketId));
+        setPendingTickets(prev => prev.filter(t => t.id !== data.ticketId));
+        return;
+      }
+
+      if (data.action !== "upsert" || !data.ticket) return;
+      
+      const ticketStatus = normalizeStatus(data.ticket.status);
+      console.log("Normalized status:", ticketStatus, "Original:", data.ticket.status); // Debug log
+      
+      // Sempre remove o ticket das duas listas primeiro
+      setOpenTickets(prev => prev.filter(t => t.id !== data.ticket.id));
+      setPendingTickets(prev => prev.filter(t => t.id !== data.ticket.id));
+      
+      // Só adiciona se o ticket deve aparecer para este usuário
+      if (!shouldUpdateTicket(data.ticket)) {
+        console.log("Ticket filtered out by shouldUpdateTicket"); // Debug log
+        return;
+      }
+      
+      if (ticketStatus === "open") {
+        console.log("Adding ticket to open list:", data.ticket.id); // Debug log
+        setOpenTickets(prev => [data.ticket, ...prev]);
+      } else if (ticketStatus === "pending") {
+        console.log("Adding ticket to pending list:", data.ticket.id); // Debug log
+        setPendingTickets(prev => [data.ticket, ...prev]);
+      }
+    });
+
+    return offTicket;
+  }, [showAll, selectedQueueIds, user]);
+
+  // Atualiza contadores
+  useEffect(() => {
+    updateOpenCount && updateOpenCount(openTickets.length);
+  }, [openTickets.length, updateOpenCount]);
+
+  useEffect(() => {
+    updatePendingCount && updatePendingCount(pendingTickets.length);
+  }, [pendingTickets.length, updatePendingCount]);
+
+  return (
+    <>
+      <div style={{ display: tabOpen === "open" ? "block" : "none" }}>
+        <List style={{ paddingTop: 0 }}>
+          {(loading && !hasInitialLoad) ? (
+            <div style={{ padding: 16, textAlign: 'center' }}>
+              Carregando tickets em aberto...
+            </div>
+          ) : openTickets.length === 0 ? (
+            <div style={{ padding: 16, textAlign: 'center', color: '#999' }}>
+              Nenhum ticket em aberto
+            </div>
+          ) : (
+            openTickets.map(ticket => (
+              <TicketListItem ticket={ticket} key={ticket.id} />
+            ))
+          )}
+        </List>
+      </div>
+      <div style={{ display: tabOpen === "pending" ? "block" : "none" }}>
+        <List style={{ paddingTop: 0 }}>
+          {(loading && !hasInitialLoad) ? (
+            <div style={{ padding: 16, textAlign: 'center' }}>
+              Carregando tickets pendentes...
+            </div>
+          ) : pendingTickets.length === 0 ? (
+            <div style={{ padding: 16, textAlign: 'center', color: '#999' }}>
+              Nenhum ticket pendente
+            </div>
+          ) : (
+            pendingTickets.map(ticket => (
+              <TicketListItem ticket={ticket} key={ticket.id} />
+            ))
+          )}
+        </List>
+      </div>
+    </>
+  );
+};
 
 const useStyles = makeStyles((theme) => ({
   ticketsWrapper: {
@@ -135,12 +307,6 @@ const TicketsManager = () => {
 
   const handleChangeTabOpen = (e, newValue) => {
     setTabOpen(newValue);
-  };
-
-  const applyPanelStyle = (status) => {
-    if (tabOpen !== status) {
-      return { width: 0, height: 0 };
-    }
   };
 
   return (
@@ -263,18 +429,12 @@ const TicketsManager = () => {
           />
         </Tabs>
         <Paper className={classes.ticketsWrapper}>
-          <TicketsList
-            status="open"
+          <CombinedTicketsList
+            tabOpen={tabOpen}
             showAll={showAllTickets}
             selectedQueueIds={selectedQueueIds}
-            updateCount={(val) => setOpenCount(val)}
-            style={applyPanelStyle("open")}
-          />
-          <TicketsList
-            status="pending"
-            selectedQueueIds={selectedQueueIds}
-            updateCount={(val) => setPendingCount(val)}
-            style={applyPanelStyle("pending")}
+            updateOpenCount={(val) => setOpenCount(val)}
+            updatePendingCount={(val) => setPendingCount(val)}
           />
         </Paper>
       </TabPanel>

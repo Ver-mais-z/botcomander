@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import QRCode from "qrcode.react";
-import openSocket from "../../services/socket-io";
+import openSocket from "../../services/socket";
 import toastError from "../../errors/toastError";
 
 import { Dialog, DialogContent, Paper, Typography } from "@material-ui/core";

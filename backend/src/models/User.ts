@@ -52,6 +52,9 @@ class User extends Model<User> {
   @Column
   whatsappId: number;
 
+  @Column({ type: DataType.BOOLEAN, defaultValue: false })
+  online!: boolean;
+
   @BelongsTo(() => Whatsapp)
   whatsapp: Whatsapp;
 

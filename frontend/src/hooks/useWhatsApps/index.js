@@ -1,5 +1,5 @@
 import { useState, useEffect, useReducer } from "react";
-import openSocket from "../../services/socket-io";
+import openSocket from "../../services/socket";
 import toastError from "../../errors/toastError";
 
 import api from "../../services/api";

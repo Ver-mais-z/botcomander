@@ -16,18 +16,21 @@ const ListContactsService = async ({
   searchParam = "",
   pageNumber = "1"
 }: Request): Promise<Response> => {
+  const term = searchParam.toLowerCase().trim();
+
   const whereCondition = {
     [Op.or]: [
       {
         name: Sequelize.where(
           Sequelize.fn("LOWER", Sequelize.col("name")),
           "LIKE",
-          `%${searchParam.toLowerCase().trim()}%`
+          `%${term}%`
         )
       },
-      { number: { [Op.like]: `%${searchParam.toLowerCase().trim()}%` } }
+      { number: { [Op.like]: `%${term}%` } }
     ]
   };
+
   const limit = 20;
   const offset = limit * (+pageNumber - 1);
 

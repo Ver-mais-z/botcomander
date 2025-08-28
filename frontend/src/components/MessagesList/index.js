@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useReducer, useRef } from "react";
 
 import { isSameDay, parseISO, format } from "date-fns";
-import openSocket from "../../services/socket-io";
+import openSocket from "../../services/socket";
 import clsx from "clsx";
 
 import { green } from "@material-ui/core/colors";
@@ -361,6 +361,9 @@ const MessagesList = ({ ticketId, isGroup }) => {
   useEffect(() => {
     const socket = openSocket();
 
+    // 🔧 correção crítica mínima: se já estiver conectado, faça o join imediatamente
+    if (socket.connected) socket.emit("joinChatBox", ticketId);
+
     socket.on("connect", () => socket.emit("joinChatBox", ticketId));
 
     socket.on("appMessage", (data) => {
@@ -375,7 +378,10 @@ const MessagesList = ({ ticketId, isGroup }) => {
     });
 
     return () => {
-      socket.disconnect();
+      // manter a conexão aberta; apenas limpe os handlers e saia da sala
+      socket.off("connect");
+      socket.off("appMessage");
+      try { socket.emit("leaveChatBox", { ticketId }); } catch {}
     };
   }, [ticketId]);
 

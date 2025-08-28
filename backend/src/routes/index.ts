@@ -11,6 +11,12 @@ import whatsappSessionRoutes from "./whatsappSessionRoutes";
 import queueRoutes from "./queueRoutes";
 import quickAnswerRoutes from "./quickAnswerRoutes";
 import apiRoutes from "./apiRoutes";
+import campaignRoutes from "./campaignRoutes";
+import ContactListItem from "./contactListItemRoutes";
+import CampaignSetting from "./campaignSettingRoutes";
+import ContactList from "./contactListRoutes";
+import Schedule from "./scheduleRoutes";
+
 
 const routes = Router();
 
@@ -24,6 +30,11 @@ routes.use(messageRoutes);
 routes.use(whatsappSessionRoutes);
 routes.use(queueRoutes);
 routes.use(quickAnswerRoutes);
+routes.use(campaignRoutes);
+routes.use(ContactListItem);
+routes.use(CampaignSetting);
+routes.use(ContactList);
+routes.use(Schedule);
 routes.use("/api/messages", apiRoutes);
 
 export default routes;

@@ -1,0 +1,36 @@
+PS E:\Projetos\Projetos-Javascript\Node\whaticket-community\backend> npm run build
+
+> backend@1.0.0 build
+> tsc
+
+src/services/WbotServices/SendWhatsAppMessage.ts:4:46 - error TS2307: Cannot find module '@adiwajshing/baileys' or its corresponding type declarations.
+
+4 import { WAMessage, AnyMessageContent } from "@adiwajshing/baileys";
+                                               ~~~~~~~~~~~~~~~~~~~~~~
+
+src/services/WbotServices/wbotMessageListener.ts:252:32 - error TS2339: Property 'mediaUrl' does not exist on type 'Message'.
+
+252       if (msg.hasMedia && !msg.mediaUrl) {
+                                   ~~~~~~~~
+
+src/services/WbotServices/wbotMessageListener.ts:280:9 - error TS2769: No overload matches this call.
+  Overload 1 of 2, '(this: (new () => Ticket) & typeof Model, options?: FindOptions | undefined): Promise<Ticket | null>', gave the following error.
+    Type '{ [Op.not]: string[]; }' is not assignable to type 'string | number | boolean | Date | Buffer | WhereAttributeHash | AndOperator | OrOperator | Literal | ... 6 more ... | null'.
+      Types of property '[Op.not]' are incompatible.
+        Type 'string[]' is not assignable to type 'string | number | boolean | Literal | WhereOperators | undefined'.
+  Overload 2 of 2, '(this: (new () => Ticket) & typeof Model, options: NonNullFindOptions): Promise<Ticket>', gave the following error.
+    Type '{ [Op.not]: string[]; }' is not assignable to type 'string | number | boolean | Date | Buffer | WhereAttributeHash | AndOperator | OrOperator | Literal | ... 6 more ... | null'.
+      Types of property '[Op.not]' are incompatible.
+        Type 'string[]' is not assignable to type 'string | number | boolean | Literal | WhereOperators | undefined'.
+
+280         status: {
+            ~~~~~~
+
+
+
+Found 3 errors in 2 files.
+
+Errors  Files
+     1  src/services/WbotServices/SendWhatsAppMessage.ts:4
+     2  src/services/WbotServices/wbotMessageListener.ts:252
+PS E:\Projetos\Projetos-Javascript\Node\whaticket-community\backend>

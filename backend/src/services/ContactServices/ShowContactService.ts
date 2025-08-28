@@ -1,7 +1,9 @@
 import Contact from "../../models/Contact";
 import AppError from "../../errors/AppError";
 
-const ShowContactService = async (id: string | number): Promise<Contact> => {
+const ShowContactService = async (
+  id: string | number
+): Promise<Contact> => {
   const contact = await Contact.findByPk(id, { include: ["extraInfo"] });
 
   if (!contact) {

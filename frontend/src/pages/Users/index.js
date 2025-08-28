@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useReducer } from "react";
 import { toast } from "react-toastify";
-import openSocket from "../../services/socket-io";
+import openSocket from "../../services/socket";
 
 import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
